@@ -31,8 +31,14 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** Streams camera frames to the PC, shows the face-swapped frames that come back. */
+/**
+ * Streams camera frames to the PC and shows what comes back.
+ * Face mode swaps only the face; body mode (EXTRA_BODY) re-renders the whole
+ * person from the chosen photo while following your pose.
+ */
 class FaceSwapActivity : ComponentActivity() {
+    companion object { const val EXTRA_BODY = "body" }
+    private val bodyMode by lazy { intent.getBooleanExtra(EXTRA_BODY, false) }
     private lateinit var view: FrameView
     private lateinit var status: android.widget.TextView
     private val exec = Executors.newSingleThreadExecutor()
@@ -57,8 +63,8 @@ class FaceSwapActivity : ComponentActivity() {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(0x99000000.toInt())
             setPadding(dp(8), dp(8), dp(8), dp(8))
-            addView(button("選擇要變成的臉…") { pickFace.launch("image/*") }, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(button("原本的臉") { selectFace(null) })
+            addView(button(if (bodyMode) "選擇要變成的人（全身照）…" else "選擇要變成的臉…") { pickFace.launch("image/*") }, LinearLayout.LayoutParams(0, -2, 1f))
+            if (!bodyMode) addView(button("原本的臉") { selectFace(null) })
             addView(button("切換鏡頭") { useFront = !useFront; startCamera() })
         }
         setContentView(FrameLayout(this).apply {
@@ -82,7 +88,7 @@ class FaceSwapActivity : ComponentActivity() {
     private fun setStatus(s: String) = runOnUiThread { status.text = s }
 
     private fun connect() {
-        val req = Request.Builder().url(Net.ws(this, "/ws/video")).build()
+        val req = Request.Builder().url(Net.ws(this, if (bodyMode) "/ws/body" else "/ws/video")).build()
         ws = Net.http.newWebSocket(req, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 connected.set(true)
@@ -97,7 +103,7 @@ class FaceSwapActivity : ComponentActivity() {
                 frames++
                 val now = System.currentTimeMillis()
                 if (now - fpsT0 >= 1000) {
-                    setStatus("換臉中  ${frames * 1000 / (now - fpsT0)} fps")
+                    setStatus((if (bodyMode) "全身替換中  " else "換臉中  ") + "${frames * 1000 / (now - fpsT0)} fps")
                     frames = 0; fpsT0 = now
                 }
             }

@@ -1,12 +1,12 @@
 # MorphCam server one-time setup (Windows, NVIDIA GPU).
-# Requires: Python 3.10, Git, Visual Studio 2022 Build Tools (C++ workload, for insightface).
+# Requires: any Python 3 with the "py" launcher, Git, Visual Studio 2022 Build
+# Tools (C++ workload, for insightface). Clone to a short path such as C:\MorphCam.
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
-& py -3.10 --version
-if (-not $?) { Write-Error "Python 3.10 not found. Install it from python.org first."; exit 1 }
-
-if (-not (Test-Path .venv)) { & py -3.10 -m venv .venv }
+# uv fetches a private Python 3.10, so no system-wide 3.10 install is needed.
+& py -m pip install --user -q uv
+if (-not (Test-Path .venv)) { & py -m uv venv --python 3.10 --seed .venv }
 $vpy = ".\.venv\Scripts\python.exe"
 & $vpy -m pip install --upgrade pip wheel setuptools
 

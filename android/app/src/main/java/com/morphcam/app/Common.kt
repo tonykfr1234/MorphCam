@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 object Prefs {
     private fun sp(c: Context) = c.getSharedPreferences("morphcam", Context.MODE_PRIVATE)
-    fun server(c: Context): String = sp(c).getString("server", "http://192.168.1.100:8765")!!
+    fun server(c: Context): String = sp(c).getString("server", "http://192.168.1.100:18765")!!
     fun setServer(c: Context, v: String) = sp(c).edit().putString("server", v.trim().trimEnd('/')).apply()
     fun faceId(c: Context): String? = sp(c).getString("face", null)
     fun setFaceId(c: Context, v: String?) = sp(c).edit().putString("face", v).apply()

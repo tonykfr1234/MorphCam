@@ -1,0 +1,62 @@
+# Full-body replacement: pose from the camera (ControlNet OpenPose),
+# appearance from the reference photo (IP-Adapter + img2img base),
+# then the reference face is pasted on with inswapper.
+model_id: "Lykon/dreamshaper-8"
+t_index_list: [6, 28]   # tuned on RTX 3060: lower = follows pose more, less of the camera image
+width: 512
+height: 512
+device: "cuda"
+dtype: "float16"
+
+prompt: "a photo of a person, full body, standing, natural lighting, high quality, realistic"
+negative_prompt: "blurry, low quality, distorted, deformed, extra limbs, bad anatomy, text, watermark"
+guidance_scale: 1.0
+num_inference_steps: 50
+seed: 42
+
+frame_buffer_size: 1
+delta: 0.7
+use_denoising_batch: true
+lora_dict:
+  "latent-consistency/lcm-lora-sdv1-5": 1.0
+use_tiny_vae: true
+# The StreamDiffusion fork only runs its ControlNet/IP-Adapter path through
+# TensorRT. The first start builds engines (~15-30 min on an RTX 3060).
+acceleration: "tensorrt"
+cfg_type: "self"
+scheduler: "lcm"
+sampler: "normal"
+engine_dir: "./engines/sd15"
+
+use_controlnet: true
+use_ipadapter: true
+
+ipadapters:
+  # Standard (4-token) adapter: the fork's config loader does not pass
+  # num_image_tokens through, so the 16-token "plus" model cannot be used.
+  - ipadapter_model_path: "h94/IP-Adapter/models/ip-adapter_sd15.bin"
+    image_encoder_path: "h94/IP-Adapter/models/image_encoder"
+    scale: 0.8
+    enabled: true
+
+controlnets:
+  - model_id: "lllyasviel/control_v11p_sd15_openpose"
+    conditioning_scale: 1.0
+    # Must be explicit: the fork's loader passes None otherwise and the
+    # ControlNet TensorRT build fails, silently falling back to PyTorch.
+    conditioning_channels: 3
+    # Pose maps are drawn by body_swap.py on a CPU thread that overlaps the
+    # GPU work of the previous frame, so the ControlNet just takes them as-is.
+    preprocessor: "passthrough"
+    enabled: true
+
+# MediaPipePosePreprocessor settings (read by body_swap.py, not StreamDiffusion)
+pose_params:
+  detect_resolution: 256
+  image_resolution: 512
+  model_complexity: 0
+  static_image_mode: false
+  draw_hands: true
+  draw_face: false
+  enable_smoothing: true
+  smoothing_factor: 0.6

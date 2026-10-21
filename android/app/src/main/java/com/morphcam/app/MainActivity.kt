@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
             label(""),
             button("👕  換衣服（手機本機運算）") { open(ClothesActivity::class.java) },
             button("🎭  換臉（需要電腦伺服器）") { open(FaceSwapActivity::class.java) },
+            button("🧍  全身替換（需要電腦伺服器）") {
+                save(); startActivity(Intent(this, FaceSwapActivity::class.java).putExtra(FaceSwapActivity.EXTRA_BODY, true))
+            },
             button("🎙  變聲／聲音複製（需要電腦伺服器）") { open(VoiceActivity::class.java) },
             label(
                 "\n使用規範：換臉畫面一律加上「AI 生成」浮水印；複製聲音必須由聲音本人親自念同意聲明。" +

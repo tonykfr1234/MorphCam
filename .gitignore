@@ -15,3 +15,6 @@ server/data/
 server/third_party/
 __pycache__/
 *.pyc
+server/fullbody/.venv/
+server/fullbody/engines/
+server/fullbody/bench_*

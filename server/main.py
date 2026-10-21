@@ -1,6 +1,6 @@
 """MorphCam PC server: face swap + voice conversion for the Android app.
 
-Run:  python main.py            (listens on 0.0.0.0:8765)
+Run:  python main.py            (listens on 0.0.0.0:18765)
 """
 import asyncio
 import json
@@ -23,7 +23,8 @@ FACES = DATA / "faces"
 VOICES = DATA / "voices"
 MODELS = ROOT / "models"
 SEEDVC_DIR = Path(os.environ.get("SEEDVC_DIR", ROOT / "third_party" / "seed-vc"))
-PORT = int(os.environ.get("MORPHCAM_PORT", "8765"))
+PORT = int(os.environ.get("MORPHCAM_PORT", "18765"))
+BODY_PORT = int(os.environ.get("MORPHCAM_BODY_PORT", "18766"))
 VOICE_BLOCK_S = float(os.environ.get("MORPHCAM_VOICE_BLOCK", "1.0"))
 for d in (FACES, VOICES):
     d.mkdir(parents=True, exist_ok=True)
@@ -126,6 +127,46 @@ async def ws_video(ws: WebSocket):
                     await ws.send_bytes(buf.tobytes())
     except WebSocketDisconnect:
         pass
+
+
+@app.websocket("/ws/body")
+async def ws_body(ws: WebSocket):
+    """Full-body replacement. Relayed to the fullbody worker (separate venv,
+    started by run.ps1) so the phone only needs one address."""
+    import websockets
+
+    await ws.accept()
+    try:
+        upstream = await websockets.connect(
+            f"ws://127.0.0.1:{BODY_PORT}/ws/body", max_size=8 * 1024 * 1024, open_timeout=5,
+            ping_interval=None,  # localhost; a busy GPU worker must not trip keepalive
+        )
+    except Exception:
+        await ws.send_text(json.dumps({"error": "全身替換服務沒有啟動，請用 run.ps1 啟動伺服器"}))
+        await ws.close()
+        return
+
+    async def phone_to_worker():
+        while True:
+            msg = await ws.receive()
+            if msg["type"] == "websocket.disconnect":
+                return
+            await upstream.send(msg.get("bytes") or msg.get("text"))
+
+    async def worker_to_phone():
+        async for m in upstream:
+            if isinstance(m, bytes):
+                await ws.send_bytes(m)
+            else:
+                await ws.send_text(m)
+
+    tasks = [asyncio.create_task(phone_to_worker()), asyncio.create_task(worker_to_phone())]
+    try:
+        await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+    finally:
+        for t in tasks:
+            t.cancel()
+        await upstream.close()
 
 
 # ---------------------------------------------------------------- voices
