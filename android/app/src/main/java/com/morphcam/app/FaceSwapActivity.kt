@@ -74,7 +74,7 @@ class FaceSwapActivity : ComponentActivity() {
         if (ensurePermission(Manifest.permission.CAMERA, 1)) startCamera()
     }
 
-    override fun onRequestPermissionsResult(code: Int, perms: Array<out String>, res: IntArray) {
+    override fun onRequestPermissionsResult(code: Int, perms: Array<String>, res: IntArray) {
         super.onRequestPermissionsResult(code, perms, res)
         if (res.firstOrNull() == 0) startCamera() else toast("需要相機權限")
     }
