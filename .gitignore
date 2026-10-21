@@ -1,0 +1,17 @@
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/*.task
+*.apk
+.idea/
+*.iml
+
+# Server
+server/.venv/
+server/models/
+server/data/
+server/third_party/
+__pycache__/
+*.pyc

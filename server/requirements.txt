@@ -1,0 +1,13 @@
+# torch / torchaudio (CUDA build) are installed by setup.ps1 before this file.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+numpy<2
+opencv-python>=4.9
+onnxruntime-gpu>=1.19
+insightface==0.7.3
+librosa>=0.10
+soundfile>=0.12
+faster-whisper>=1.0
+speechbrain>=1.0
+opencc-python-reimplemented>=0.1.7
