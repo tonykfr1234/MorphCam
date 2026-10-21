@@ -39,7 +39,7 @@ val downloadPoseModel by tasks.registering {
             poseModel.parentFile.mkdirs()
             val url = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/" +
                 "pose_landmarker_full/float16/latest/pose_landmarker_full.task"
-            java.net.URL(url).openStream().use { input ->
+            uri(url).toURL().openStream().use { input ->
                 poseModel.outputStream().use { input.copyTo(it) }
             }
         }
