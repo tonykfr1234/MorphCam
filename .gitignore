@@ -18,3 +18,4 @@ __pycache__/
 server/fullbody/.venv/
 server/fullbody/engines/
 server/fullbody/bench_*
+server/constraints.txt
