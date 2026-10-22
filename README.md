@@ -14,6 +14,23 @@
             <── 換好臉的 JPEG / 變好聲的 PCM ──
 ```
 
+## 一鍵使用（Windows）
+
+先裝好 [Git](https://git-scm.com/download/win)、[Python 3](https://www.python.org/downloads/)、[VS 2022 Build Tools（C++）](https://visualstudio.microsoft.com/visual-cpp-build-tools/)，然後在 PowerShell 貼上這一行：
+
+```powershell
+cd C:\; git clone https://github.com/tonykfr1234/MorphCam.git; C:\MorphCam\install.bat
+```
+
+之後在 `C:\MorphCam` 雙擊就能用：
+
+| 檔案 | 用途 |
+|---|---|
+| `install.bat` | 安裝或重新安裝（主伺服器加全身替換，約 30 分鐘） |
+| `start.bat` | 啟動：換臉、變聲（換衣服在手機上算，不需要電腦） |
+| `start-fullbody.bat` | 啟動全身替換模式（獨佔 12 GB 顯卡） |
+| `update.bat` | 從 GitHub 更新到最新版 |
+
 ## 硬體需求
 
 | | 最低 | 建議 | 你的 RTX 3060 12GB |
