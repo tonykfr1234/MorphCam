@@ -4,7 +4,7 @@ cd /d "%~dp0"
 echo ============================================================
 echo  MorphCam 一鍵安裝（主伺服器 + 全身替換），約 30 分鐘
 echo ============================================================
-git pull
+rem Updating is a separate action; installation also supports an extracted ZIP.
 echo.
 echo [1/2] 安裝主伺服器（換臉、變聲）...
 powershell -NoProfile -ExecutionPolicy Bypass -File server\setup.ps1
@@ -19,6 +19,6 @@ pause
 exit /b 0
 :fail
 echo.
-echo 安裝失敗，請把上面的錯誤訊息貼給 Claude。
+echo 安裝失敗，請依 INSTALL.zh-TW.md 檢查前置軟體，並保留上面的錯誤訊息。
 pause
 exit /b 1
